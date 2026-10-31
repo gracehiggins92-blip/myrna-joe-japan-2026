@@ -198,6 +198,52 @@ details .details-content{padding:12px 0 3px}
   }
 }
 
+.flight-heading {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.flight-badge {
+  display: inline-block;
+  padding: 9px 18px;
+  border-radius: 30px;
+  background: #eee2c7;
+  color: #29251e;
+  font-size: 0.78rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+}
+
+.flight-date {
+  color: var(--muted, #777);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+}
+
+.flight-card + .flight-card {
+  margin-top: 18px;
+}
+
+.flight-arrival {
+  text-align: right;
+}
+
+@media (max-width: 600px) {
+  .flight-heading {
+    grid-column: 1;
+    margin-bottom: 0;
+  }
+
+  .flight-arrival {
+    text-align: left;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -258,7 +304,65 @@ details .details-content{padding:12px 0 3px}
   <section class="details-area" id="trip-resources">
     <details><summary>Trip overview</summary><div class="details-content"><section class="intro" id="overview"><div><div class="eyebrow">The big picture</div><h2>19 days.<br/>Seven stays and stopovers.</h2><p>Begin in Tokyo, travel into the Japanese Alps and walk sections of the historic Nakasendo, spend five nights in Kyoto, explore the art islands of the Seto Inland Sea, then return to Tokyo for the journey home.</p></div><div class="stats"><div class="stat"><strong>18</strong><span>nights in Japan / onboard</span></div><div class="stat"><strong>7</strong><span>accommodation stays</span></div><div class="stat"><strong>3</strong><span>Nakasendo walking days</span></div><div class="stat"><strong>19 Nov</strong><span>back in London</span></div></div></section></div></details>
     <details><summary>The route</summary><div class="details-content"><section id="route"><div class="section-head"><h2>The route</h2><p>From Tokyo’s neighbourhoods to mountain towns, Kyoto’s culture and the art islands.</p></div><div class="route"><article class="place"><span class="number">01 · 2–6 Nov</span><h3>Tokyo</h3><p>4 nights · first base</p></article><article class="place"><span class="number">02 · 6–9 Nov</span><h3>Alps &amp; Nakasendo</h3><p>Matsumoto, Narai, Tsumago</p></article><article class="place"><span class="number">03 · 9–14 Nov</span><h3>Kyoto</h3><p>5 nights · guide &amp; crafts</p></article><article class="place"><span class="number">04 · 14–17 Nov</span><h3>Takamatsu</h3><p>3 nights · Naoshima &amp; Teshima</p></article></div><p class="small" style="margin-top:12px">Final Tokyo stay: Asakusa, 17–19 November.</p></section></div></details>
-    <details><summary>Flights and travel times</summary><div class="details-content"><section aria-label="International flights" class="flight-graphic"><div class="flight-card"><div class="flight-end"><small>Outbound · Sun 1 Nov</small><strong>London Heathrow</strong><span>BA5 · departs 11:45</span></div><div class="flight-route"><div class="plane-line"><span class="plane">✈</span></div><p>British Airways · overnight flight</p><p>Arrive Tokyo Haneda Mon 2 Nov · 10:25</p></div><div class="flight-end" style="text-align:right"><small>Return · Thu 19 Nov</small><strong>Tokyo Haneda</strong><span>BA6 · departs 13:15</span><span>Arrives Heathrow 19:10</span></div></div></section></div></details>
+    <details><summary>Flights and travel times</summary><div class="details-content">
+<section aria-label="International flights" class="flight-graphic">
+
+  <div class="flight-card">
+    <div class="flight-heading">
+      <span class="flight-badge">OUTBOUND</span>
+      <span class="flight-date">SUN 1 NOV</span>
+    </div>
+
+    <div class="flight-end">
+      <small>LHR</small>
+      <strong>London Heathrow</strong>
+      <span>◷ Departs 11:45</span>
+      <span>BA5 · British Airways</span>
+    </div>
+
+    <div class="flight-route">
+      <div class="plane-line"><span class="plane">✈</span></div>
+      <p>Overnight flight</p>
+      <p>Duration: 12h 40m</p>
+    </div>
+
+    <div class="flight-end flight-arrival">
+      <small>HND</small>
+      <strong>Tokyo Haneda</strong>
+      <span>◷ Arrives 10:25</span>
+      <span>Mon 2 Nov</span>
+    </div>
+  </div>
+
+  <div class="flight-card">
+    <div class="flight-heading">
+      <span class="flight-badge">RETURN</span>
+      <span class="flight-date">THU 19 NOV</span>
+    </div>
+
+    <div class="flight-end">
+      <small>HND</small>
+      <strong>Tokyo Haneda</strong>
+      <span>◷ Departs 13:15</span>
+      <span>BA6 · British Airways</span>
+    </div>
+
+    <div class="flight-route">
+      <div class="plane-line"><span class="plane">✈</span></div>
+      <p>Return flight</p>
+      <p>Arrive Heathrow 19:10</p>
+    </div>
+
+    <div class="flight-end flight-arrival">
+      <small>LHR</small>
+      <strong>London Heathrow</strong>
+      <span>◷ Arrives 19:10</span>
+      <span>Thu 19 Nov</span>
+    </div>
+  </div>
+
+</section>
+</div></details>
     <details><summary>Where you’re staying</summary><div class="details-content"><section id="stays"><div class="section-head"><h2>Where you’re staying</h2><p>Your accommodation throughout the trip, as arranged through Inside Japan.</p></div><div class="stay-grid">
 <article class="stay"><div class="icon">✦</div><h3>Tokyo · first stay</h3><span class="pill">4 nights · 2–6 Nov</span><p>Mitsui Garden Hotel Jingugaien Tokyo Premier. Double room, breakfast included.</p><a href="https://www.google.com/maps/search/?api=1&amp;query=Mitsui+Garden+Hotel+Jingugaien+Tokyo+Premier" rel="noopener" target="_blank">View map ↗</a></article>
 <article class="stay"><div class="icon">山</div><h3>Matsumoto</h3><span class="pill">1 night · 6–7 Nov</span><p>Matsumoto Hotel Kagetsu. Standard twin room in main building, breakfast included.</p><a href="https://www.google.com/maps/search/?api=1&amp;query=Matsumoto+Hotel+Kagetsu" rel="noopener" target="_blank">View map ↗</a></article>
