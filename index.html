@@ -96,6 +96,108 @@ details .details-content{padding:12px 0 3px}
 .utility-dock{position:fixed;z-index:10;left:0;right:0;bottom:0;padding:9px 12px calc(9px + env(safe-area-inset-bottom));background:rgba(255,253,248,.94);backdrop-filter:blur(16px);border-top:1px solid rgba(210,198,174,.8)}.dock-inner{width:min(100%,900px);margin:auto;display:flex;align-items:center;justify-content:space-between;gap:8px}.dock-time{font-size:.72rem;color:var(--muted);line-height:1.25}.dock-time strong{display:block;color:var(--ink);font-size:.9rem}.dock-actions{display:flex;gap:6px}.dock-actions a,.dock-actions button{border:1px solid var(--line);background:var(--paper);border-radius:999px;padding:9px 10px;text-decoration:none;color:var(--ink);font-size:.78rem;font-weight:750;white-space:nowrap}
 @media(min-width:760px){.hero{padding-top:38px}.calendar-day{min-height:84px}.calendar-day .num{font-size:1.9rem}.day-body .event,.day-body .activity,.day-body .itinerary-item,.day-body .booking-card{padding:19px 22px}.details-area{padding-top:20px}}
 @media(max-width:460px){.wrap{width:calc(100% - 28px)}.hero{padding-top:20px}.hero h1{font-size:2.65rem}.hero-top{font-size:.72rem}.regions{margin-top:16px}.region-chip{font-size:.58rem;padding:11px 2px;letter-spacing:0}.calendar-grid{gap:5px}.calendar-day{min-height:66px;border-radius:12px;padding:5px 1px}.calendar-day .num{font-size:1.4rem}.calendar-day .mon{font-size:.58rem}.calendar-day .dot{font-size:.55rem}.legend{font-size:.7rem;gap:8px 11px}.day-section{padding-top:22px}.day-region{margin-bottom:20px}.intro{grid-template-columns:1fr;padding:17px}.route,.stay-grid{grid-template-columns:1fr}.pdf-panel{align-items:flex-start}.pdf-cover{min-width:82px;max-width:90px;min-height:120px}.pdf-cover strong{font-size:1.35rem}.dock-time{font-size:.64rem}.dock-time strong{font-size:.78rem}.dock-actions a,.dock-actions button{font-size:.68rem;padding:8px 8px}.dock-time.uk{display:none}.phrase-grid{grid-template-columns:1fr}}
+
+/* Flight graphic layout */
+.flight-graphic {
+  margin: 12px 0;
+}
+
+.flight-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 18px;
+  padding: 22px;
+  background: var(--paper, #fffdf8);
+  border: 1px solid var(--line, #e6dfd2);
+  border-radius: 18px;
+  box-shadow: var(--shadow, 0 4px 18px #0000000a);
+}
+
+.flight-end {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  overflow-wrap: anywhere;
+}
+
+.flight-end small {
+  color: var(--muted, #777);
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.flight-end strong {
+  font: 1.3rem/1.2 Georgia, serif;
+}
+
+.flight-end span {
+  color: var(--muted, #777);
+  font-size: 0.86rem;
+}
+
+.flight-route {
+  min-width: 0;
+  text-align: center;
+}
+
+.plane-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.plane-line::before,
+.plane-line::after {
+  content: "";
+  flex: 1;
+  border-top: 2px dashed #c8b58f;
+}
+
+.plane {
+  color: var(--gold, #b28b4d);
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.flight-route p {
+  margin: 8px 0;
+  color: var(--muted, #777);
+  font-size: 0.82rem;
+}
+
+@media (max-width: 600px) {
+  .flight-card {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+    padding: 17px;
+  }
+
+  .flight-end,
+  .flight-end[style] {
+    text-align: left !important;
+  }
+
+  .flight-end strong {
+    font-size: 1.25rem;
+  }
+
+  .flight-route {
+    text-align: left;
+    border-top: 1px solid var(--line, #e6dfd2);
+    border-bottom: 1px solid var(--line, #e6dfd2);
+    padding: 8px 0;
+  }
+
+  .plane-line {
+    max-width: 180px;
+  }
+}
+
 </style>
 </head>
 <body>
