@@ -418,7 +418,79 @@ details .details-content{padding:12px 0 3px}
   function renderCalendar(){grid.innerHTML='';for(let d=1;d<=19;d++){const key=dateFor(d),region=regionFor(d),button=document.createElement('button');button.type='button';button.className='calendar-day '+region.key+(key===selected?' selected':'')+(allEntries.some(row=>row.entry_date===key&&((row.title||'').trim()||(row.content||'').trim()))?' has-journal':'');button.setAttribute('aria-label',pretty(key)+(key===selected?', selected':''));button.setAttribute('aria-pressed',String(key===selected));button.innerHTML='<span class="num">'+d+'</span><span class="mon">NOV</span><span class="dot">●</span>';button.addEventListener('click',()=>selectDate(key,true));grid.appendChild(button)}}
   function renderSelectedDay(){const day=Number(selected.slice(-2));document.querySelectorAll('article.day').forEach(article=>article.classList.toggle('active-day',article.dataset.date===selected));document.getElementById('selected-date-label').textContent=pretty(selected)+' · Day '+day+' of 19';document.getElementById('selected-day-heading').textContent=dayTitle(day);const region=regionFor(day);const badge=document.getElementById('selected-region');badge.className='day-region '+region.key;badge.textContent=region.label;document.getElementById('day-nav-label').innerHTML='<strong>Day '+day+' of 19</strong>'+shortDate(selected);document.getElementById('day-prev').disabled=day<=1;document.getElementById('day-next').disabled=day>=19;renderCalendar();renderJournalEntries();}
   function selectDate(key,scroll){selected=key;titleInput.value='';textInput.value='';status.textContent='Entries are shared online. Add a new memory for '+pretty(key)+'.';renderSelectedDay();if(scroll)document.getElementById('daily-view').scrollIntoView({behavior:'smooth',block:'start'})}
-  function renderJournalEntries(){const list=document.getElementById('journal-entries-list');list.replaceChildren();const entries=allEntries.filter(row=>row.entry_date===selected&&((row.title||'').trim()||(row.content||'').trim()));if(!entries.length){const empty=document.createElement('p');empty.className='journal-empty';empty.textContent='No memories saved for this day yet. Add the first one below.';list.appendChild(empty);return}entries.forEach(row=>{const card=document.createElement('article');card.className='journal-entry';const heading=document.createElement('h3');heading.textContent=row.title||'A memory from today';const date=document.createElement('p');date.className='journal-entry-date';date.textContent='Saved '+new Date(row.created_at).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});const content=document.createElement('p');content.className='journal-entry-content';content.textContent=row.content||'';card.append(heading,date,content);list.appendChild(card)})}
+
+function renderJournalEntries() {
+  const list = document.getElementById('journal-entries-list');
+  list.replaceChildren();
+
+  const entries = allEntries.filter(row =>
+    row.entry_date === selected &&
+    ((row.title || '').trim() || (row.content || '').trim())
+  );
+
+  if (!entries.length) {
+    const empty = document.createElement('p');
+    empty.className = 'journal-empty';
+    empty.textContent = 'No memories saved for this day yet. Add the first one below.';
+    list.appendChild(empty);
+    return;
+  }
+
+  entries.forEach(row => {
+    const card = document.createElement('article');
+    card.className = 'journal-entry';
+
+    const heading = document.createElement('h3');
+    heading.textContent = row.title || 'A memory from today';
+
+    const date = document.createElement('p');
+    date.className = 'journal-entry-date';
+    date.textContent = 'Saved ' + new Date(row.created_at).toLocaleString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    const content = document.createElement('p');
+    content.className = 'journal-entry-content';
+    content.textContent = row.content || '';
+
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.textContent = 'Delete entry';
+
+    remove.addEventListener('click', async () => {
+      if (!confirm('Delete this journal entry for both travellers? This cannot be undone.')) {
+        return;
+      }
+
+      remove.disabled = true;
+      remove.textContent = 'Deleting…';
+
+      const { error } = await supabaseClient
+        .from('trip-entries')
+        .delete()
+        .eq('id', row.id)
+        .eq('entry_type', 'journal');
+
+      if (error) {
+        console.error('Journal delete error:', error);
+        alert('The entry could not be deleted. Please try again.');
+        remove.disabled = false;
+        remove.textContent = 'Delete entry';
+        return;
+      }
+
+      await loadSharedEntries(true);
+      status.textContent = 'Journal entry deleted.';
+    });
+
+    card.append(heading, date, content, remove);
+    list.appendChild(card);
+  });
+}
+
   async function loadSharedEntries(showStatus=false){if(!supabaseClient){document.getElementById('journal-entries-list').innerHTML='<p class="journal-empty">The shared journal connection could not be started. Please check the website connection.</p>';status.textContent='Shared journal connection unavailable.';return false}const {data,error}=await supabaseClient.from('trip-entries').select('entry_date,title,content,created_at').eq('entry_type','journal').order('created_at',{ascending:false});if(error){console.error('Journal load error:',error);if(showStatus)status.textContent='Could not load the shared journal. Please try again.';return false}allEntries=data||[];renderSelectedDay();return true}
   document.getElementById('day-prev').addEventListener('click',()=>{const d=Number(selected.slice(-2));if(d>1)selectDate(dateFor(d-1),true)});
   document.getElementById('day-next').addEventListener('click',()=>{const d=Number(selected.slice(-2));if(d<19)selectDate(dateFor(d+1),true)});
