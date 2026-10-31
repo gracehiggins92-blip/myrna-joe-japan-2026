@@ -456,6 +456,59 @@ function renderJournalEntries() {
     content.className = 'journal-entry-content';
     content.textContent = row.content || '';
 
+    const deleteButton = document.createElement('button');
+    deleteButton.type = 'button';
+    deleteButton.textContent = 'Delete entry';
+    deleteButton.addEventListener('click', async () => {
+      if (!confirm('Are you sure you want to delete this journal entry for everyone?')) {
+        return;
+      }
+
+      deleteButton.disabled = true;
+      deleteButton.textContent = 'Deleting…';
+
+      const { error } = await supabaseClient
+        .from('trip-entries')
+        .delete()
+        .eq('id', row.id)
+        .eq('entry_type', 'journal');
+
+      if (error) {
+        console.error('Journal delete error:', error);
+        alert('Could not delete this entry. Please try again.');
+        deleteButton.disabled = false;
+        deleteButton.textContent = 'Delete entry';
+        return;
+      }
+
+      await loadSharedEntries();
+    });
+
+    card.append(heading, date, content, deleteButton);
+    list.appendChild(card);
+  });
+}
+
+  entries.forEach(row => {
+    const card = document.createElement('article');
+    card.className = 'journal-entry';
+
+    const heading = document.createElement('h3');
+    heading.textContent = row.title || 'A memory from today';
+
+    const date = document.createElement('p');
+    date.className = 'journal-entry-date';
+    date.textContent = 'Saved ' + new Date(row.created_at).toLocaleString('en-GB', {
+      day: 'numeric',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    const content = document.createElement('p');
+    content.className = 'journal-entry-content';
+    content.textContent = row.content || '';
+
     const remove = document.createElement('button');
     remove.type = 'button';
     remove.textContent = 'Delete entry';
@@ -491,7 +544,7 @@ function renderJournalEntries() {
   });
 }
 
-  async function loadSharedEntries(showStatus=false){if(!supabaseClient){document.getElementById('journal-entries-list').innerHTML='<p class="journal-empty">The shared journal connection could not be started. Please check the website connection.</p>';status.textContent='Shared journal connection unavailable.';return false}const {data,error}=await supabaseClient.from('trip-entries').select('entry_date,title,content,created_at').eq('entry_type','journal').order('created_at',{ascending:false});if(error){console.error('Journal load error:',error);if(showStatus)status.textContent='Could not load the shared journal. Please try again.';return false}allEntries=data||[];renderSelectedDay();return true}
+  async function loadSharedEntries(showStatus=false){if(!supabaseClient){document.getElementById('journal-entries-list').innerHTML='<p class="journal-empty">The shared journal connection could not be started. Please check the website connection.</p>';status.textContent='Shared journal connection unavailable.';return false}const {data,error}=await supabaseClient.from('trip-entries').select('id,entry_date,title,content,created_at').eq('entry_type','journal').order('created_at',{ascending:false});if(error){console.error('Journal load error:',error);if(showStatus)status.textContent='Could not load the shared journal. Please try again.';return false}allEntries=data||[];renderSelectedDay();return true}
   document.getElementById('day-prev').addEventListener('click',()=>{const d=Number(selected.slice(-2));if(d>1)selectDate(dateFor(d-1),true)});
   document.getElementById('day-next').addEventListener('click',()=>{const d=Number(selected.slice(-2));if(d<19)selectDate(dateFor(d+1),true)});
   document.getElementById('journal-form').addEventListener('submit',async event=>{event.preventDefault();const title=titleInput.value.trim(),content=textInput.value.trim();if(!title&&!content){status.textContent='Add a title or some notes first.';return}if(!supabaseClient){status.textContent='Shared journal connection unavailable.';return}const save=document.getElementById('save-journal');save.disabled=true;save.textContent='Saving…';status.textContent='Saving to the shared journal…';const {error}=await supabaseClient.from('trip-entries').insert({entry_type:'journal',title,content,entry_date:selected});if(error){console.error('Journal save error:',error);status.textContent='Could not save. Please check your connection and try again.';save.disabled=false;save.textContent='Save journal entry';return}titleInput.value='';textInput.value='';await loadSharedEntries(true);status.textContent='Saved for '+pretty(selected)+'. This entry is shared on the live website.';save.disabled=false;save.textContent='Save journal entry'});
