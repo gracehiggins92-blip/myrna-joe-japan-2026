@@ -567,7 +567,6 @@ if (recInput && saveRecButton && recList) {
 
   loadRecommendations();
 }
-catch(error){recStatus.textContent='Could not save. Please try again.'}});document.getElementById('clear-recommendation-input').addEventListener('click',()=>{recInput.value='';recStatus.textContent=''});drawRecs()}
   // Refresh shared entries periodically so another traveller's new notes appear on this open page.
   renderSelectedDay();updateClocks();setInterval(updateClocks,1000);loadSharedEntries();setInterval(()=>loadSharedEntries(false),30000);
 })();
