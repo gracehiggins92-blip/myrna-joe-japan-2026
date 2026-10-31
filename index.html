@@ -445,7 +445,129 @@ details .details-content{padding:12px 0 3px}
   });
   const gbp=document.getElementById('gbp-amount'),yen=document.getElementById('yen-amount');if(gbp&&yen){function updateCurrency(source){if(source==='gbp'){const value=Math.max(0,Number(gbp.value)||0);yen.value=Math.round(value*200);document.getElementById('yen-result').innerHTML='<strong>≈ ¥'+Math.round(value*200).toLocaleString('en-GB')+'</strong>'}else{const value=Math.max(0,Number(yen.value)||0);gbp.value=(value/200).toFixed(2);document.getElementById('gbp-result').innerHTML='<strong>≈ £'+(value/200).toFixed(2)+'</strong>'}}gbp.addEventListener('input',()=>updateCurrency('gbp'));yen.addEventListener('input',()=>updateCurrency('yen'))}
   function updateClocks(){const now=new Date(),timeOptions={hour:'2-digit',minute:'2-digit',hourCycle:'h23'},dateOptions={weekday:'short',day:'numeric',month:'short'};document.getElementById('japan-clock').textContent=new Intl.DateTimeFormat('en-GB',{...timeOptions,timeZone:'Asia/Tokyo'}).format(now);document.getElementById('japan-date').textContent=new Intl.DateTimeFormat('en-GB',{...dateOptions,timeZone:'Asia/Tokyo'}).format(now);document.getElementById('uk-clock').textContent=new Intl.DateTimeFormat('en-GB',{...timeOptions,timeZone:'Europe/London'}).format(now);document.getElementById('uk-date').textContent=new Intl.DateTimeFormat('en-GB',{...dateOptions,timeZone:'Europe/London'}).format(now)}
-  const recKey='myrna-joe-japan-recommendations-v1',recInput=document.getElementById('recommendation-text'),recList=document.getElementById('recommendation-list'),recStatus=document.getElementById('recommend-status');function getRecs(){try{return JSON.parse(localStorage.getItem(recKey)||'[]')}catch(e){return []}}function drawRecs(){if(!recList)return;recList.replaceChildren();getRecs().forEach((item,index)=>{const card=document.createElement('div');card.className='recommend-item';const text=document.createElement('span');text.textContent=item;const remove=document.createElement('button');remove.type='button';remove.textContent='Remove';remove.addEventListener('click',()=>{const all=getRecs();all.splice(index,1);localStorage.setItem(recKey,JSON.stringify(all));drawRecs();if(recStatus)recStatus.textContent='Recommendation removed.'});card.append(text,remove);recList.appendChild(card)});if(!recList.children.length){const p=document.createElement('p');p.className='small';p.textContent='Your saved recommendations will appear here on this device.';recList.appendChild(p)}}if(recInput){document.getElementById('save-recommendation').addEventListener('click',()=>{const value=recInput.value.trim();if(!value){recStatus.textContent='Add some text first.';return}const all=getRecs();all.push(value);try{localStorage.setItem(recKey,JSON.stringify(all));recInput.value='';recStatus.textContent='Recommendation saved on this device.';drawRecs()}catch(error){recStatus.textContent='Could not save. Please try again.'}});document.getElementById('clear-recommendation-input').addEventListener('click',()=>{recInput.value='';recStatus.textContent=''});drawRecs()}
+  
+const recInput = document.getElementById('recommendation-text');
+const recList = document.getElementById('recommendation-list');
+const recStatus = document.getElementById('recommend-status');
+const saveRecButton = document.getElementById('save-recommendation');
+
+async function loadRecommendations() {
+  if (!recList) return;
+
+  if (!supabaseClient) {
+    recStatus.textContent = 'Recommendations connection unavailable.';
+    return;
+  }
+
+  const { data, error } = await supabaseClient
+    .from('trip-entries')
+    .select('id, title, content, created_at')
+    .eq('entry_type', 'recommendation')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Recommendations load error:', error);
+    recStatus.textContent = 'Could not load recommendations.';
+    return;
+  }
+
+  recList.replaceChildren();
+
+  if (!data || data.length === 0) {
+    const empty = document.createElement('p');
+    empty.className = 'small';
+    empty.textContent = 'No recommendations saved yet. Add the first one above.';
+    recList.appendChild(empty);
+    return;
+  }
+
+  data.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'recommend-item';
+
+    const text = document.createElement('span');
+    text.textContent = item.content || item.title || '';
+
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.textContent = 'Remove';
+
+    remove.addEventListener('click', async () => {
+      if (!confirm('Delete this recommendation for everyone?')) return;
+
+      remove.disabled = true;
+      recStatus.textContent = 'Removing recommendation…';
+
+      const { error: deleteError } = await supabaseClient
+        .from('trip-entries')
+        .delete()
+        .eq('id', item.id)
+        .eq('entry_type', 'recommendation');
+
+      if (deleteError) {
+        console.error('Recommendation delete error:', deleteError);
+        recStatus.textContent = 'Could not remove it. Please try again.';
+        remove.disabled = false;
+        return;
+      }
+
+      recStatus.textContent = 'Recommendation removed.';
+      await loadRecommendations();
+    });
+
+    card.append(text, remove);
+    recList.appendChild(card);
+  });
+}
+
+if (recInput && saveRecButton && recList) {
+  saveRecButton.addEventListener('click', async () => {
+    const value = recInput.value.trim();
+
+    if (!value) {
+      recStatus.textContent = 'Add some text first.';
+      return;
+    }
+
+    if (!supabaseClient) {
+      recStatus.textContent = 'Recommendations connection unavailable.';
+      return;
+    }
+
+    saveRecButton.disabled = true;
+    recStatus.textContent = 'Saving recommendation…';
+
+    const { error } = await supabaseClient
+      .from('trip-entries')
+      .insert({
+        entry_type: 'recommendation',
+        title: value.length > 80 ? value.slice(0, 80) : value,
+        content: value,
+        entry_date: null
+      });
+
+    if (error) {
+      console.error('Recommendation save error:', error);
+      recStatus.textContent = 'Could not save. Please try again.';
+      saveRecButton.disabled = false;
+      return;
+    }
+
+    recInput.value = '';
+    recStatus.textContent = 'Recommendation saved and shared.';
+    await loadRecommendations();
+    saveRecButton.disabled = false;
+  });
+
+  document.getElementById('clear-recommendation-input')
+    ?.addEventListener('click', () => {
+      recInput.value = '';
+      recStatus.textContent = '';
+    });
+
+  loadRecommendations();
+}
+catch(error){recStatus.textContent='Could not save. Please try again.'}});document.getElementById('clear-recommendation-input').addEventListener('click',()=>{recInput.value='';recStatus.textContent=''});drawRecs()}
   // Refresh shared entries periodically so another traveller's new notes appear on this open page.
   renderSelectedDay();updateClocks();setInterval(updateClocks,1000);loadSharedEntries();setInterval(()=>loadSharedEntries(false),30000);
 })();
