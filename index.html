@@ -7,7 +7,7 @@
 <meta name="description" content="Myrna and Joe's Japan trip itinerary and shared travel journal, November 2026.">
 <title>Myrna &amp; Joe's Japan · November 2026</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
+<style>F
 :root{--ink:#29251f;--muted:#6c6254;--cream:#f4efe4;--paper:#fffdf8;--line:#e2d8c5;--green:#3d7958;--tokyo:#dce8f3;--tokyo-ink:#315778;--alps:#e4def7;--alps-ink:#5547a6;--kyoto:#f2dfd0;--kyoto-ink:#99532d;--seto:#d8ece8;--seto-ink:#347b72;--gold:#a47d32;--shadow:0 10px 30px rgba(62,47,27,.06)}
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:18px}
@@ -489,60 +489,7 @@ function renderJournalEntries() {
   });
 }
 
-  entries.forEach(row => {
-    const card = document.createElement('article');
-    card.className = 'journal-entry';
-
-    const heading = document.createElement('h3');
-    heading.textContent = row.title || 'A memory from today';
-
-    const date = document.createElement('p');
-    date.className = 'journal-entry-date';
-    date.textContent = 'Saved ' + new Date(row.created_at).toLocaleString('en-GB', {
-      day: 'numeric',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-
-    const content = document.createElement('p');
-    content.className = 'journal-entry-content';
-    content.textContent = row.content || '';
-
-    const remove = document.createElement('button');
-    remove.type = 'button';
-    remove.textContent = 'Delete entry';
-
-    remove.addEventListener('click', async () => {
-      if (!confirm('Delete this journal entry for both travellers? This cannot be undone.')) {
-        return;
-      }
-
-      remove.disabled = true;
-      remove.textContent = 'Deleting…';
-
-      const { error } = await supabaseClient
-        .from('trip-entries')
-        .delete()
-        .eq('id', row.id)
-        .eq('entry_type', 'journal');
-
-      if (error) {
-        console.error('Journal delete error:', error);
-        alert('The entry could not be deleted. Please try again.');
-        remove.disabled = false;
-        remove.textContent = 'Delete entry';
-        return;
-      }
-
-      await loadSharedEntries(true);
-      status.textContent = 'Journal entry deleted.';
-    });
-
-    card.append(heading, date, content, remove);
-    list.appendChild(card);
-  });
-}
+ 
 
   async function loadSharedEntries(showStatus=false){if(!supabaseClient){document.getElementById('journal-entries-list').innerHTML='<p class="journal-empty">The shared journal connection could not be started. Please check the website connection.</p>';status.textContent='Shared journal connection unavailable.';return false}const {data,error}=await supabaseClient.from('trip-entries').select('id,entry_date,title,content,created_at').eq('entry_type','journal').order('created_at',{ascending:false});if(error){console.error('Journal load error:',error);if(showStatus)status.textContent='Could not load the shared journal. Please try again.';return false}allEntries=data||[];renderSelectedDay();return true}
   document.getElementById('day-prev').addEventListener('click',()=>{const d=Number(selected.slice(-2));if(d>1)selectDate(dateFor(d-1),true)});
